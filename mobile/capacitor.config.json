@@ -1,0 +1,16 @@
+{
+  "appId": "com.jarvisai.assistant",
+  "appName": "JARVIS AI",
+  "webDir": "www",
+  "server": {
+    "url": "https://jarvis-ai-production-75cd2e63.up.railway.app",
+    "cleartext": false,
+    "allowNavigation": [
+      "jarvis-ai-production-75cd2e63.up.railway.app"
+    ],
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#212121"
+  }
+}
