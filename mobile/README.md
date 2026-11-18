@@ -34,3 +34,8 @@ cd android
 ```
 
 APK output: `mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
+
+
+## November 2026 voice compatibility refresh
+
+The Android wrapper loads the live JARVIS service, including the ElevenLabs voice-library pagination and Android audio-preview compatibility fixes in the current backend.
