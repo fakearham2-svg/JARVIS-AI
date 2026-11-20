@@ -10,8 +10,13 @@ import java.io.*;
 import java.util.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.getcapacitor.*;
-import com.getcapacitor.ActivityResult;
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.annotation.ActivityCallback;
+import com.getcapacitor.annotation.CapacitorPlugin;
 
 @CapacitorPlugin(name = "JarvisLocalModels")
 public class JarvisLocalModelsPlugin extends Plugin {
