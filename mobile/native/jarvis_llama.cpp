@@ -8,7 +8,7 @@
 static llama_model * model=nullptr;
 static llama_context * ctx=nullptr;
 static std::mutex lock;
-extern "C" JNIEXPORT jboolean JNICALL Java_com_jarvisai_assistant_JarvisLocalModelsPlugin_nativeLoad(JNIEnv* env,jclass,jstring path,jint contextSize){
+extern "C" JNIEXPORT jboolean JNICALL Java_com_jarvisai_assistant_JarvisLocalModelsPlugin_nativeLoad(JNIEnv* env,jclass,jstring path,jint contextSize,jint requestedThreads){
  std::lock_guard<std::mutex> g(lock);
  if(ctx){llama_free(ctx);ctx=nullptr;} if(model){llama_model_free(model);model=nullptr;}
  const char* p=env->GetStringUTFChars(path,nullptr);
@@ -16,8 +16,8 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_jarvisai_assistant_JarvisLocalMod
  model=llama_model_load_from_file(p,mp); env->ReleaseStringUTFChars(path,p);
  if(!model)return JNI_FALSE;
  llama_context_params cp=llama_context_default_params(); cp.n_ctx=contextSize>0?contextSize:2048; cp.n_batch=256;
- int threads=std::max(2,(int)std::thread::hardware_concurrency()); threads=std::min(threads,4);
- cp.n_threads=threads; cp.n_threads_batch=threads;
+ int available=(int)std::thread::hardware_concurrency(); if(available<1)available=4; int threads=requestedThreads>0?requestedThreads:4; threads=std::max(1,std::min(threads,std::min(available,8)));
+ cp.n_threads=threads; cp.n_threads_batch=std::min(threads,4);
  ctx=llama_init_from_model(model,cp); if(!ctx){llama_model_free(model);model=nullptr;return JNI_FALSE;} return JNI_TRUE;
 }
 extern "C" JNIEXPORT void JNICALL Java_com_jarvisai_assistant_JarvisLocalModelsPlugin_nativeUnload(JNIEnv*,jclass){std::lock_guard<std::mutex> g(lock);if(ctx){llama_free(ctx);ctx=nullptr;}if(model){llama_model_free(model);model=nullptr;}}
