@@ -46,6 +46,9 @@ jobs:
         working-directory: mobile
         run: npx cap add android
 
+      - name: Install JARVIS native GGUF storage plugin
+        run: python3 mobile/native/setup_android.py
+
       - name: Build debug APK
         working-directory: mobile/android
         run: ./gradlew assembleDebug --no-daemon
