@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <thread>
+#include <algorithm>
 #include "llama.h"
 static llama_model * model=nullptr;
 static llama_context * ctx=nullptr;
