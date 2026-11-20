@@ -32,7 +32,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_jarvisai_assistant_JarvisLocalMode
  if(formatted.empty())formatted=std::string("System: ")+system+"\nUser: "+input+"\nAssistant:";
  const llama_vocab* vocab=llama_model_get_vocab(model);
  std::vector<llama_token> tokens(formatted.size()+512);
- int n=llama_tokenize(vocab,formatted.c_str(),(int)formatted.size(),tokens.data(),(int)tokens.size(),true,true);
+ int n=llama_tokenize(vocab,formatted.c_str(),(int)formatted.size(),tokens.data(),(int)tokens.size(),false,true);
  if(n<0){tokens.resize(-n);n=llama_tokenize(vocab,formatted.c_str(),(int)formatted.size(),tokens.data(),(int)tokens.size(),true,true);} if(n<=0)return env->NewStringUTF("ERROR: Tokenization failed");tokens.resize(n);
  int context=(int)llama_n_ctx(ctx),limit=maxTokens>0?maxTokens:256;
  if((int)tokens.size()+limit>=context){return env->NewStringUTF("ERROR: Prompt too long for selected context. Increase context size or start a new chat.");}
