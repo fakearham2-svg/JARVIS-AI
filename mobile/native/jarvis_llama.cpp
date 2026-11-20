@@ -26,9 +26,9 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_jarvisai_assistant_JarvisLocalMode
  const char* p=env->GetStringUTFChars(prompt,nullptr); std::string input(p);env->ReleaseStringUTFChars(prompt,p);
  const char* system="You are JARVIS, a helpful, accurate, friendly assistant. Reply in the same language and style as the user. If the user writes Roman Urdu/Hinglish, reply naturally in Roman Urdu/Hinglish; if English, reply in English. Keep answers clear and relevant. Do not invent facts. Answer the latest user message directly. Do not repeat the prompt or output role labels.";
  llama_chat_message messages[2]={{"system",system},{"user",input.c_str()}};
- int32_t needed=llama_chat_apply_template(nullptr,messages,2,true,nullptr,0);
+ const char* modelTemplate=llama_model_chat_template(model,nullptr);\n int32_t needed=llama_chat_apply_template(modelTemplate,messages,2,true,nullptr,0);
  std::string formatted;
- if(needed>0){formatted.resize((size_t)needed+1);int32_t written=llama_chat_apply_template(nullptr,messages,2,true,formatted.data(),(int32_t)formatted.size());if(written>0)formatted.resize((size_t)written);else formatted.clear();}
+ if(needed>0){formatted.resize((size_t)needed+1);int32_t written=llama_chat_apply_template(modelTemplate,messages,2,true,formatted.data(),(int32_t)formatted.size());if(written>0)formatted.resize((size_t)written);else formatted.clear();}
  if(formatted.empty())formatted=std::string("System: ")+system+"\nUser: "+input+"\nAssistant:";
  const llama_vocab* vocab=llama_model_get_vocab(model);
  std::vector<llama_token> tokens(formatted.size()+512);
