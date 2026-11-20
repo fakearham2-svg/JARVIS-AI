@@ -21,7 +21,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "JarvisLocalModels")
 public class JarvisLocalModelsPlugin extends Plugin {
   static { System.loadLibrary("jarvis_llama"); }
-  private static native boolean nativeLoad(String path, int contextSize);
+  private static native boolean nativeLoad(String path, int contextSize, int threads);
   private static native void nativeUnload();
   private static native String nativeGenerate(String prompt, int maxTokens);
   @PluginMethod public void pickModel(PluginCall call) {
@@ -48,7 +48,7 @@ public class JarvisLocalModelsPlugin extends Plugin {
       JSObject o=new JSObject();o.put("name",target.getName());o.put("size",target.length());o.put("id",target.getName());call.resolve(o);
     }catch(Exception e){call.reject("Import failed: "+e.getMessage());}
   }
-  @PluginMethod public void loadModel(PluginCall call){String id=call.getString("id");if(id==null||id.contains("/")||id.contains("\\")||id.equals("..")){call.reject("Invalid model id");return;}File f=new File(new File(getContext().getFilesDir(),"gguf-models"),id);if(!f.isFile()){call.reject("Model not found");return;}int ctx=call.getInt("contextSize",2048);boolean ok=nativeLoad(f.getAbsolutePath(),ctx);if(!ok){call.reject("Model load failed. Device RAM may be insufficient or model unsupported.");return;}JSObject r=new JSObject();r.put("loaded",true);r.put("name",id);r.put("contextSize",ctx);call.resolve(r);}
+  @PluginMethod public void loadModel(PluginCall call){String id=call.getString("id");if(id==null||id.contains("/")||id.contains("\\")||id.equals("..")){call.reject("Invalid model id");return;}File f=new File(new File(getContext().getFilesDir(),"gguf-models"),id);if(!f.isFile()){call.reject("Model not found");return;}int ctx=call.getInt("contextSize",2048);int threads=call.getInt("threads",4);threads=Math.max(1,Math.min(8,threads));boolean ok=nativeLoad(f.getAbsolutePath(),ctx,threads);if(!ok){call.reject("Model load failed. Device RAM may be insufficient or model unsupported.");return;}JSObject r=new JSObject();r.put("loaded",true);r.put("name",id);r.put("contextSize",ctx);call.resolve(r);}
   @PluginMethod public void unloadModel(PluginCall call){nativeUnload();call.resolve();}
   @PluginMethod public void generate(PluginCall call){String prompt=call.getString("prompt");if(prompt==null||prompt.trim().isEmpty()){call.reject("Prompt required");return;}int max=call.getInt("maxTokens",256);String result=nativeGenerate(prompt,max);if(result!=null&&result.startsWith("ERROR:")){call.reject(result);return;}JSObject r=new JSObject();r.put("text",result);call.resolve(r);}
   @PluginMethod public void listModels(PluginCall call){
