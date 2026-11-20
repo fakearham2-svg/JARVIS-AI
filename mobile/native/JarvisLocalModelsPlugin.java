@@ -19,7 +19,11 @@ import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 @CapacitorPlugin(name = "JarvisLocalModels")
-public class JarvisLocalModelsPlugin extends Plugin {\n  static { System.loadLibrary("jarvis_llama"); }\n  private static native boolean nativeLoad(String path, int contextSize);\n  private static native void nativeUnload();\n  private static native String nativeGenerate(String prompt, int maxTokens);
+public class JarvisLocalModelsPlugin extends Plugin {
+  static { System.loadLibrary("jarvis_llama"); }
+  private static native boolean nativeLoad(String path, int contextSize);
+  private static native void nativeUnload();
+  private static native String nativeGenerate(String prompt, int maxTokens);
   @PluginMethod public void pickModel(PluginCall call) {
     Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
     intent.setType("*/*");
@@ -44,7 +48,10 @@ public class JarvisLocalModelsPlugin extends Plugin {\n  static { System.loadLib
       JSObject o=new JSObject();o.put("name",target.getName());o.put("size",target.length());o.put("id",target.getName());call.resolve(o);
     }catch(Exception e){call.reject("Import failed: "+e.getMessage());}
   }
-  @PluginMethod public void loadModel(PluginCall call){String id=call.getString("id");if(id==null||id.contains("/")||id.contains("\\\\")||id.equals("..")){call.reject("Invalid model id");return;}File f=new File(new File(getContext().getFilesDir(),"gguf-models"),id);if(!f.isFile()){call.reject("Model not found");return;}int ctx=call.getInt("contextSize",2048);boolean ok=nativeLoad(f.getAbsolutePath(),ctx);if(!ok){call.reject("Model load failed. Device RAM may be insufficient or model unsupported.");return;}JSObject r=new JSObject();r.put("loaded",true);r.put("name",id);r.put("contextSize",ctx);call.resolve(r);}\n  @PluginMethod public void unloadModel(PluginCall call){nativeUnload();call.resolve();}\n  @PluginMethod public void generate(PluginCall call){String prompt=call.getString("prompt");if(prompt==null||prompt.trim().isEmpty()){call.reject("Prompt required");return;}int max=call.getInt("maxTokens",256);String result=nativeGenerate(prompt,max);if(result!=null&&result.startsWith("ERROR:")){call.reject(result);return;}JSObject r=new JSObject();r.put("text",result);call.resolve(r);}\n  @PluginMethod public void listModels(PluginCall call){
+  @PluginMethod public void loadModel(PluginCall call){String id=call.getString("id");if(id==null||id.contains("/")||id.contains("\\")||id.equals("..")){call.reject("Invalid model id");return;}File f=new File(new File(getContext().getFilesDir(),"gguf-models"),id);if(!f.isFile()){call.reject("Model not found");return;}int ctx=call.getInt("contextSize",2048);boolean ok=nativeLoad(f.getAbsolutePath(),ctx);if(!ok){call.reject("Model load failed. Device RAM may be insufficient or model unsupported.");return;}JSObject r=new JSObject();r.put("loaded",true);r.put("name",id);r.put("contextSize",ctx);call.resolve(r);}
+  @PluginMethod public void unloadModel(PluginCall call){nativeUnload();call.resolve();}
+  @PluginMethod public void generate(PluginCall call){String prompt=call.getString("prompt");if(prompt==null||prompt.trim().isEmpty()){call.reject("Prompt required");return;}int max=call.getInt("maxTokens",256);String result=nativeGenerate(prompt,max);if(result!=null&&result.startsWith("ERROR:")){call.reject(result);return;}JSObject r=new JSObject();r.put("text",result);call.resolve(r);}
+  @PluginMethod public void listModels(PluginCall call){
     File dir=new File(getContext().getFilesDir(),"gguf-models");dir.mkdirs();JSONArray a=new JSONArray();
     File[] files=dir.listFiles();if(files!=null)for(File f:files)if(f.isFile()&&f.getName().toLowerCase(Locale.ROOT).endsWith(".gguf")){JSONObject o=new JSONObject();try{o.put("name",f.getName());o.put("id",f.getName());o.put("size",f.length());o.put("path",f.getAbsolutePath());a.put(o);}catch(Exception ignored){}}
     JSObject r=new JSObject();r.put("models",a);StatFs fs=new StatFs(getContext().getFilesDir().getAbsolutePath());r.put("availableBytes",fs.getAvailableBytes());r.put("totalBytes",fs.getTotalBytes());call.resolve(r);
