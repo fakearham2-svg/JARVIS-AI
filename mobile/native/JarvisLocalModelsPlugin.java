@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
-import android.provider.OpenDocument;
 import android.database.Cursor;
 import android.provider.OpenableColumns;
 import java.io.*;
@@ -12,6 +11,7 @@ import java.util.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.getcapacitor.*;
+import com.getcapacitor.ActivityResult;
 
 @CapacitorPlugin(name = "JarvisLocalModels")
 public class JarvisLocalModelsPlugin extends Plugin {
